@@ -25,13 +25,53 @@
 
   let inputTodo: string = "";
 
+  var id = 0;
+  class Todo {
+    name: string;
+    checked: boolean;
+    isEditing: boolean;
+    id: number;
+    constructor(
+      name: string,
+      checked: boolean,
+      isEditing: boolean,
+      idParam: number,
+    ) {
+      this.name = name;
+      this.checked = checked;
+      this.isEditing = isEditing;
+      this.id = idParam == -1 ? id++ : idParam;
+    }
+    toString() {
+      return this.name;
+    }
+  }
+
+  const converter = {
+    fromFirestore: (data: any) => {
+      return new Todo(data.name, data.checked, data.isEditing, data.id);
+    },
+    toFirestore: (todo: Todo) => {
+      return {
+        name: todo.name,
+        checked: todo.checked,
+        isEditing: todo.isEditing,
+      };
+    },
+  };
+
+  function toTodos(data: any) {
+    let todos: Todo[] = [];
+    for (let i = 0; i < data.length; i++) {
+      todos.push(converter.fromFirestore(data[i]));
+    }
+    return todos;
+  }
+
   function addTodo() {
-    let location: string = "data/storage/todos/" + inputTodo;
-    setDoc(doc(firestore, location), {
-      name: inputTodo,
-      checked: false,
-      isEditing: false,
-    });
+    const todo = new Todo(inputTodo, false, false, -1);
+    let location: string = "data/storage/todos/" + todo.id;
+    setDoc(doc(firestore, location), converter.toFirestore(todo));
     inputTodo = "";
   }
 </script>
@@ -52,7 +92,8 @@
 </form>
 <div class="grid grid-cols-3 gap-4 mx-20 mt-16">
   <Collection ref={"data/storage/todos"} let:data>
-    {#each data as todo (todo.name)}
+    <ProgressRadial slot="loading" />
+    {#each toTodos(data) as todo (todo.name)}
       <div class="card">
         <header class="card-header">
           <h2 class="h2">{todo.name}</h2>
@@ -61,7 +102,7 @@
           <button
             class="btn variant-filled"
             on:click={() => {
-              deleteDoc(doc(firestore, "data/storage/todos/" + todo.name));
+              deleteDoc(doc(firestore, "data/storage/todos/" + todo.id));
             }}>Delete</button
           >
           <button
@@ -79,13 +120,10 @@
                   required: true,
                 },
                 response: (r) => {
-                  if (r && r != todo.name) {
-                    updateDoc(
-                      doc(firestore, "data/storage/todos/" + todo.name),
-                      {
-                        name: r,
-                      },
-                    );
+                  if (r && r != todo.name) {ß
+                    updateDoc(doc(firestore, "data/storage/todos/" + todo.id), {
+                      name: r,
+                    });ß
                   }
                 },
               });
@@ -94,6 +132,5 @@
         </section>
       </div>
     {/each}
-    <ProgressRadial slot="loading" />
   </Collection>
 </div>
