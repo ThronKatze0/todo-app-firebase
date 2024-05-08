@@ -120,10 +120,10 @@
                   required: true,
                 },
                 response: (r) => {
-                  if (r && r != todo.name) {ß
+                  if (r && r != todo.name) {
                     updateDoc(doc(firestore, "data/storage/todos/" + todo.id), {
                       name: r,
-                    });ß
+                    });
                   }
                 },
               });
