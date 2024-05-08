@@ -95,8 +95,33 @@
     <ProgressRadial slot="loading" />
     {#each toTodos(data) as todo (todo.name)}
       <div class="card">
-        <header class="card-header">
-          <h2 class="h2">{todo.name}</h2>
+        <header class="card-header flex flex-row">
+          <div class="flex flex-row justify-between">
+            {#if todo.checked}
+              <h2 class="h2 line-through">{todo.name}</h2>
+              <input
+                class="checkbox p-3.5"
+                type="checkbox"
+                checked
+                on:click={() => {
+                  updateDoc(doc(firestore, "data/storage/todos/" + todo.id), {
+                    checked: !todo.checked,
+                  });
+                }}
+              />
+            {:else}
+              <h2 class="h2">{todo.name}</h2>
+              <input
+                class="checkbox p-3.5"
+                type="checkbox"
+                on:click={() => {
+                  updateDoc(doc(firestore, "data/storage/todos/" + todo.id), {
+                    checked: !todo.checked,
+                  });
+                }}
+              />
+            {/if}
+          </div>
         </header>
         <section class="p-4">
           <button
@@ -116,7 +141,7 @@
                 valueAttr: {
                   type: "text",
                   minlength: 3,
-                  maxlength: 10,
+                  maxlength: 15,
                   required: true,
                 },
                 response: (r) => {
