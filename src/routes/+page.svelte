@@ -42,6 +42,9 @@
       this.isEditing = isEditing;
       this.id = idParam == -1 ? id++ : idParam;
     }
+    getId() {
+      return this.id;
+    }
     toString() {
       return this.name;
     }
@@ -56,6 +59,7 @@
         name: todo.name,
         checked: todo.checked,
         isEditing: todo.isEditing,
+        id: todo.id,
       };
     },
   };
@@ -65,13 +69,17 @@
     for (let i = 0; i < data.length; i++) {
       todos.push(converter.fromFirestore(data[i]));
     }
+    console.log(todos);
+    if (todos.length > 0) id = todos[todos.length - 1].id + 1;
     return todos;
   }
 
   function addTodo() {
     const todo = new Todo(inputTodo, false, false, -1);
     let location: string = "data/storage/todos/" + todo.id;
-    setDoc(doc(firestore, location), converter.toFirestore(todo));
+    setDoc(doc(firestore, location), converter.toFirestore(todo), {
+      merge: true,
+    });
     inputTodo = "";
   }
 </script>
@@ -93,7 +101,7 @@
 <div class="grid grid-cols-3 gap-4 mx-20 mt-16">
   <Collection ref={"data/storage/todos"} let:data>
     <ProgressRadial slot="loading" />
-    {#each toTodos(data) as todo (todo.name)}
+    {#each toTodos(data) as todo (todo.id)}
       <div class="card">
         <header class="card-header flex flex-row">
           <div class="flex flex-row justify-between">
