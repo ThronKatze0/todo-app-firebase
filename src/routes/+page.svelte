@@ -91,69 +91,72 @@
   >
 </form>
 <div class="grid grid-cols-3 gap-4 mx-20 mt-16">
-  <Collection ref={"data/storage/todos"} let:data>
+  <Collection ref={"data/storage/todos"} let:data let:count>
     <ProgressRadial slot="loading" />
     {#each toTodos(data) as todo (todo.name)}
       <div class="card">
-        <header class="card-header flex flex-row">
-          <div class="flex flex-row justify-between">
-            {#if todo.checked}
-              <h2 class="h2 line-through">{todo.name}</h2>
-              <input
-                class="checkbox p-3.5"
-                type="checkbox"
-                checked
-                on:click={() => {
-                  updateDoc(doc(firestore, "data/storage/todos/" + todo.id), {
-                    checked: !todo.checked,
-                  });
-                }}
-              />
-            {:else}
-              <h2 class="h2">{todo.name}</h2>
-              <input
-                class="checkbox p-3.5"
-                type="checkbox"
-                on:click={() => {
-                  updateDoc(doc(firestore, "data/storage/todos/" + todo.id), {
-                    checked: !todo.checked,
-                  });
-                }}
-              />
-            {/if}
-          </div>
+        <header class="card-header flex flex-row justify-between mb-5">
+          {#if todo.checked}
+            <h2 class="h2 line-through">{todo.name}</h2>
+            <input
+              class="checkbox p-3.5"
+              type="checkbox"
+              checked
+              on:click={() => {
+                updateDoc(doc(firestore, "data/storage/todos/" + todo.id), {
+                  checked: !todo.checked,
+                });
+              }}
+            />
+          {:else}
+            <h2 class="h2">{todo.name}</h2>
+            <input
+              class="checkbox p-3.5"
+              type="checkbox"
+              on:click={() => {
+                updateDoc(doc(firestore, "data/storage/todos/" + todo.id), {
+                  checked: !todo.checked,
+                });
+              }}
+            />
+          {/if}
         </header>
         <section class="p-4">
-          <button
-            class="btn variant-filled"
-            on:click={() => {
-              deleteDoc(doc(firestore, "data/storage/todos/" + todo.id));
-            }}>Delete</button
-          >
-          <button
-            class="btn variant-filled"
-            on:click={() => {
-              modalStore.trigger({
-                type: "prompt",
-                title: "Edit Todo",
-                body: "You can edit your Todo below",
-                value: todo.name,
-                valueAttr: {
-                  type: "text",
-                  minlength: 3,
-                  maxlength: 15,
-                  required: true,
-                },
-                response: (r) => {
-                  if (r && r != todo.name) {
-                    updateDoc(doc(firestore, "data/storage/todos/" + todo.id), {
-                      name: r,
-                    });
-                  }
-                },
-              });
-            }}>Edit</button
-          >
+          <div class="flex flex-row justify-end">
+            <button
+              class="btn variant-filled mr-3"
+              on:click={() => {
+                deleteDoc(doc(firestore, "data/storage/todos/" + todo.id));
+              }}>Delete</button
+            >
+            <button
+              class="btn variant-filled"
+              on:click={() => {
+                modalStore.trigger({
+                  type: "prompt",
+                  title: "Edit Todo",
+                  body: "You can edit your Todo below",
+                  value: todo.name,
+                  valueAttr: {
+                    type: "text",
+                    minlength: 3,
+                    maxlength: 30,
+                    required: true,
+                  },
+                  response: (r) => {
+                    if (r && r != todo.name) {
+                      updateDoc(
+                        doc(firestore, "data/storage/todos/" + todo.id),
+                        {
+                          name: r,
+                        },
+                      );
+                    }
+                  },
+                });
+              }}>Edit</button
+            >
+          </div>
         </section>
       </div>
     {/each}
